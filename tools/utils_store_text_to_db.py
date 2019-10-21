@@ -5,7 +5,7 @@ __date__ = '2019/9/24 11:23 AM'
 import os
 import pymongo
 from dbModel import NSJModel
-from config_utils import read_config_from_configfile
+from config_utils import read_config_from_configfile, modify_config_file
 
 
 PWD_PATH = os.getcwd()
@@ -17,10 +17,16 @@ LEVEL_ONE_CLASS = os.listdir(LEVEL_ONE_PATH)
 
 
 IS_NEED_TO_UPDATE = False
+modify_store_list = []
+
+CONFIG_FILE = read_config_from_configfile()
 
 def run():
     for item in LEVEL_ONE_CLASS:
         show_detail(LEVEL_ONE_PATH, item)
+    if len(modify_store_list) != 0:
+        print("Size: ", len(modify_store_list))
+        modify_config_file("store_list", modify_store_list)
 
 
 def show_detail(folder_dir, filename):
@@ -30,6 +36,12 @@ def show_detail(folder_dir, filename):
         level_num = "01"
 
     lession_num = filename.split('_')[1]
+    if lession_num in CONFIG_FILE.get('store_list'):
+        print("Lesson: ", lession_num, " has store in db.")
+        return
+    else:
+        if lession_num not in modify_store_list:
+            modify_store_list.append(lession_num)
     file_dir = folder_dir + '/' + filename
     insert_list = []
     with open(file_dir, 'r') as file_to_read:
@@ -188,7 +200,7 @@ def get_nayi(type, japanese):
 
 
 def insert_into_db(model_list):
-    client = pymongo.MongoClient(read_config_from_configfile().get('mongodb_url'), read_config_from_configfile().get('mongodb_port'))
+    client = pymongo.MongoClient(CONFIG_FILE.get('mongodb_url'), CONFIG_FILE.get('mongodb_port'))
     db = client["DailyProject"]
     collection = db["JPN"]
     for item in model_list:

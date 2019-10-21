@@ -15,3 +15,12 @@ def read_config_from_configfile():
         print("Config_utils_read_config_from_configfile:::")
         print(load_json)
     return load_json
+
+
+def modify_config_file(key_name, value):
+    print("Key: ", key_name, " Value:", value)
+    json_obj = read_config_from_configfile()
+    json_obj[key_name] = value
+    with open(FILE_PATH + '/config.json', 'w') as write_f:
+        json.dump(json_obj, write_f)
+        print("write success")
